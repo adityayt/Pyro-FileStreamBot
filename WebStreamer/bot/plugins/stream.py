@@ -11,7 +11,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 db = Database(Var.DATABASE_URL, Var.SESSION_NAME)
 
 
-@StreamBot.on_message(filters.private & (filters.document | filters.video | filters.audio) & ~filters.edited, group=4)
+@StreamBot.on_message((filters.private | filters.group) & (filters.document | filters.video | filters.audio) & ~filters.edited, group=4)
 async def private_receive_handler(c: Client, m: Message):
     if not await db.is_user_exist(m.from_user.id):
         await db.add_user(m.from_user.id)
@@ -21,7 +21,7 @@ async def private_receive_handler(c: Client, m: Message):
         )
     if Var.UPDATES_CHANNEL != "None":
         try:
-            user = await c.get_chat_member(Var.UPDATES_CHANNEL, m.chat.id)
+            user = await c.get_chat_member(Var.UPDATES_CHANNEL, m.from_user.id)
             if user.status == "kicked":
                 await c.send_message(
                     chat_id=m.chat.id,
